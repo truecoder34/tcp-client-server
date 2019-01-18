@@ -1,0 +1,1 @@
+SELECT * FROM dbo.tbSchedule WHERE departStation = 'Volgograd' AND arriveStation = 'Moscow'
