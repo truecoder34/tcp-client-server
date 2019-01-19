@@ -471,6 +471,9 @@ namespace ClientRailwayCashBoxWF {
 		private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 			// Do-while loop to send and receive data
 			char buf[8192];
+			// INITIALIZE buf by 1 symbols. PREVENT \0 symbol appearance 
+			memset(buf,1,sizeof(char)*8192);
+
 			userInput = "1"; // тип операции		
 
 			System::String^ DepartSt = tbDepartSt->Text; // считали текст из поля DepartSt	
@@ -485,8 +488,19 @@ namespace ClientRailwayCashBoxWF {
 				if (sendResult != SOCKET_ERROR)
 				{
 					// Wait for response
-					ZeroMemory(buf, 8192);
-					int bytesReceived = recv(sock, buf, 8192, 0); // принимаем ответ от сервера					
+					int bytesReceived = recv(sock, buf, 8192, 0); // принимаем ответ от сервера			
+
+					// TRY TO GET ALL DATA, TO PREVENT INTERUPTIONS
+					char * pch = strchr(buf, '\0'); // Parse by \0 symbol 
+
+					// IF THERE IS NO \0 symbol in recieved STRING
+					while (pch == NULL)
+					{
+						//WAIT UNTILL WE GET THIS SYMBOL
+						bytesReceived = recv(sock, buf, 8192, 0); // ждем получение данных (блокирующая функция - задерживает выполнение кода на себе ожидая)
+						pch = strchr(buf, '\0');
+					}
+					// -----------
 
 					if (bytesReceived > 0)
 					{
